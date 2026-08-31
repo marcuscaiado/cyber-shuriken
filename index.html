@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Cyber Shuriken Neo 🎯⚔️</title>
   <meta name="description" content="Hypnotic timing & target blade throwing game. Stick all neon shurikens into the spinning cyber core without colliding!">
+  <script src="arcade-leaderboard.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; user-select: none; }
     body {
@@ -338,7 +339,17 @@
       localStorage.setItem('cyber_shuriken_best', bestStage);
       document.getElementById('final-score').textContent = score;
       document.getElementById('best-stage').textContent = bestStage;
-      document.getElementById('modal').style.display = 'flex';
+
+      if (window.ArcadeLeaderboard) {
+        window.ArcadeLeaderboard.show({
+          gameId: 'cyber-shuriken',
+          score: score,
+          scoreUnit: 'PTS',
+          onRestart: restartGame
+        });
+      } else {
+        document.getElementById('modal').style.display = 'flex';
+      }
     }
 
     function restartGame() {
