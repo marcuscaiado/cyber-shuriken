@@ -339,17 +339,13 @@
       localStorage.setItem('cyber_shuriken_best', bestStage);
       document.getElementById('final-score').textContent = score;
       document.getElementById('best-stage').textContent = bestStage;
+      document.getElementById('modal').style.display = 'flex';
 
-      if (window.ArcadeLeaderboard) {
-        window.ArcadeLeaderboard.show({
-          gameId: 'cyber-shuriken',
-          score: score,
-          scoreUnit: 'PTS',
-          onRestart: restartGame
-        });
-      } else {
-        document.getElementById('modal').style.display = 'flex';
-      }
+      try {
+        if (window.ArcadeLeaderboard) {
+          window.ArcadeLeaderboard.submitScore('cyber-shuriken', score);
+        }
+      } catch(e){}
     }
 
     function restartGame() {
