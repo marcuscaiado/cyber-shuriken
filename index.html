@@ -279,16 +279,21 @@
       document.getElementById('stage-val').textContent = currentStage;
 
       const isBoss = stageNum % 4 === 0;
-      core.color = isBoss ? '#ff007f' : '#00f5ff';
-      core.rotSpeed = 0.024 + (stageNum % 5) * 0.004;
+      const palette = ['#00f5ff', '#ff007f', '#ffd32a', '#05ffa1', '#b967ff'];
+      core.color = isBoss ? '#ff007f' : palette[(stageNum - 1) % palette.length];
+      
+      // Dynamic rotation modes: Steady, Oscillating, Pulse
+      core.baseRotSpeed = 0.022 + Math.min(0.014, stageNum * 0.0018);
+      core.rotMode = stageNum % 3; // 0: Steady, 1: Pendulum Wave, 2: Pulse Speed
+      core.rotSpeed = core.baseRotSpeed;
 
-      bladesTotal = 6 + Math.min(Math.floor(stageNum / 2), 6);
+      bladesTotal = 6 + Math.min(Math.floor(stageNum / 2), 5);
       bladesRemaining = bladesTotal;
       stuckKnives = [];
       flyingKnife = null;
 
-      // Pre-populate some starter blades on higher levels
-      const preCount = Math.min(Math.floor((stageNum - 1) / 3), 4);
+      // Pre-populate fair starter blades on higher levels
+      const preCount = Math.min(Math.floor((stageNum - 1) / 3), 3);
       for (let i = 0; i < preCount; i++) {
         stuckKnives.push({
           angle: (i / preCount) * Math.PI * 2,
@@ -304,7 +309,7 @@
       flyingKnife = {
         x: 275,
         y: 660,
-        vy: -22,
+        vy: -24,
         length: 55
       };
 
@@ -387,9 +392,18 @@
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Rotate Core
+      // Rotate Core with Dynamic Procedural Modes
       if (!isGameOver) {
-        core.rotation += core.rotSpeed;
+        if (core.rotMode === 1) {
+          // Smooth sinusoidal pendulum oscillation
+          core.rotation += Math.sin(Date.now() * 0.002) * core.baseRotSpeed * 1.5;
+        } else if (core.rotMode === 2) {
+          // Rhythm pulse acceleration
+          const pulseSpd = core.baseRotSpeed * (1 + Math.cos(Date.now() * 0.003) * 0.4);
+          core.rotation += pulseSpd;
+        } else {
+          core.rotation += core.baseRotSpeed;
+        }
       }
       core.pulse = Math.max(0, core.pulse - 0.05);
 
@@ -468,9 +482,9 @@
           let normContact = contactAngle % (Math.PI * 2);
           if (normContact < 0) normContact += Math.PI * 2;
 
-          // Check Collision with existing stuck blades
+          // Check Collision with existing stuck blades (Fair 0.22 margin)
           let hitOther = false;
-          const TOLERANCE_ANGLE = 0.26; // Generous & fair tolerance window
+          const TOLERANCE_ANGLE = 0.22;
 
           for (const k of stuckKnives) {
             let normK = k.angle % (Math.PI * 2);
