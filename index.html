@@ -500,6 +500,7 @@
           }
 
           if (hitOther) {
+            if (window.DopamineSynth) window.DopamineSynth.playThud(0.35);
             triggerDeflect(flyingKnife.x, targetContactY);
             flyingKnife = null;
           } else {
@@ -508,16 +509,30 @@
               angle: contactAngle,
               length: 55
             });
-            playStickSound();
+            if (window.DopamineSynth) {
+              window.DopamineSynth.playCombo(stuckKnives.length);
+            } else {
+              playStickSound();
+            }
             core.pulse = 1.2;
             score += 100;
             document.getElementById('score-val').textContent = score;
+            if (window.DopamineJuice) {
+              window.DopamineJuice.spawnScore(flyingKnife.x, targetContactY, '+100 🎯', stuckKnives.length);
+            }
             spawnShatterParticles(flyingKnife.x, targetContactY, '#00f5ff', 8);
             flyingKnife = null;
 
             // Check if level completed
             if (bladesRemaining === 0) {
-              playShatterSound();
+              if (window.DopamineSynth) {
+                window.DopamineSynth.playWin();
+              } else {
+                playShatterSound();
+              }
+              if (window.DopamineJuice) {
+                window.DopamineJuice.explodeConfetti(core.x, core.y, 50);
+              }
               screenShake = 12;
               spawnShatterParticles(core.x, core.y, core.color, 45);
               setTimeout(() => {
